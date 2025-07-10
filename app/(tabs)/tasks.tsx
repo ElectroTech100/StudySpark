@@ -1,9 +1,11 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, Search, Filter, CircleCheck as CheckCircle, Circle, Clock, Trophy } from 'lucide-react-native';
+import { Plus, Search, Filter, CircleCheck as CheckCircle, Circle, Clock, Trophy, BookOpen, Calendar } from 'lucide-react-native';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AddTaskModal from '@/components/AddTaskModal';
+import GoogleClassroomModal from '@/components/GoogleClassroomModal';
+import CalendarSyncModal from '@/components/CalendarSyncModal';
 
 export default function TasksScreen() {
   const { user, updateUser } = useAuth();
@@ -11,6 +13,8 @@ export default function TasksScreen() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [showAddTask, setShowAddTask] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [showGoogleClassroom, setShowGoogleClassroom] = useState(false);
+  const [showCalendarSync, setShowCalendarSync] = useState(false);
 
   const toggleTask = (taskId: number) => {
     setTasks(tasks.map(task => {
@@ -75,13 +79,24 @@ export default function TasksScreen() {
     setTasks(prev => [...prev, task]);
   };
 
+  const handleTasksImported = (importedTasks: any[]) => {
+    setTasks(prev => [...prev, ...importedTasks]);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Tasks</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => setShowAddTask(true)}>
-          <Plus size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => setShowGoogleClassroom(true)}>
+            <BookOpen size={20} color="#4285F4" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={() => setShowCalendarSync(true)}>
+            <Calendar size={20} color="#8B5CF6" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddTask(true)}>
+            <Plus size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search and Filter */}
@@ -219,6 +234,18 @@ export default function TasksScreen() {
         onClose={() => setShowAddTask(false)}
         onAddTask={addTask}
       />
+
+      <GoogleClassroomModal
+        visible={showGoogleClassroom}
+        onClose={() => setShowGoogleClassroom(false)}
+        onTasksImported={handleTasksImported}
+      />
+
+      <CalendarSyncModal
+        visible={showCalendarSync}
+        onClose={() => setShowCalendarSync(false)}
+        tasks={tasks}
+      />
     </SafeAreaView>
   );
 }
@@ -240,6 +267,24 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: 'Inter-Bold',
     color: '#111827',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
+    backgroundColor: '#FFFFFF',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   addButton: {
     backgroundColor: '#8B5CF6',
