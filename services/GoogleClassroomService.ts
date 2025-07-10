@@ -30,7 +30,7 @@ interface Course {
 }
 
 class GoogleClassroomService {
-  private clientId = '289809395610-h5e6efjlrffapj3ueoa08duahkhq7srf.apps.googleusercontent.com';
+  private clientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '289809395610-h5e6efjlrffapj3ueoa08duahkhq7srf.apps.googleusercontent.com';
   private redirectUri = makeRedirectUri({
     scheme: 'myapp',
     path: 'auth'
@@ -165,6 +165,10 @@ class GoogleClassroomService {
 
   private formatDueDate(dueDate: any, dueTime?: any): string {
     try {
+      if (!dueDate || !dueDate.year) {
+        return 'YYYY-MM-DD'; // Placeholder for assignments without due dates
+      }
+      
       const date = new Date(dueDate.year, dueDate.month - 1, dueDate.day);
       
       if (dueTime) {
@@ -173,7 +177,7 @@ class GoogleClassroomService {
       
       return date.toISOString().split('T')[0];
     } catch (error) {
-      return '';
+      return 'YYYY-MM-DD';
     }
   }
 
@@ -218,15 +222,16 @@ class GoogleClassroomService {
   }
 
   private determinePriority(dueDate: string): 'low' | 'medium' | 'high' {
-    if (!dueDate) return 'medium';
+    if (!dueDate) return 'low'; // No due date = low priority
     
     const due = new Date(dueDate);
     const now = new Date();
     const daysUntilDue = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     
-    if (daysUntilDue <= 2) return 'high';
-    if (daysUntilDue <= 7) return 'medium';
-    return 'low';
+    // High priority: due within 10 days
+    if (daysUntilDue <= 10 && daysUntilDue >= 0) return 'high';
+    // Medium priority: everything else with a due date
+    return 'medium';
   }
 
   private estimateTime(points: number): string {

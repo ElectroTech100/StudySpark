@@ -129,8 +129,9 @@ export default function GoogleClassroomModal({ visible, onClose, onTasksImported
   };
 
   const formatDueDate = (dateString: string) => {
-    if (!dateString) return 'No due date';
+    if (!dateString || dateString === 'YYYY-MM-DD') return 'No due date';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'No due date';
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 

@@ -88,7 +88,18 @@ class CalendarService {
         throw new Error('No calendar available');
       }
 
+      // Handle placeholder due dates
+      if (task.dueDate === 'YYYY-MM-DD' || !task.dueDate) {
+        // Don't add to calendar if no due date
+        return null;
+      }
+      
       const dueDate = new Date(task.dueDate);
+      if (isNaN(dueDate.getTime())) {
+        // Invalid date, don't add to calendar
+        return null;
+      }
+      
       const estimatedHours = this.parseEstimatedTime(task.estimatedTime);
       
       // Create the main task event
@@ -96,31 +107,34 @@ class CalendarService {
       startDate.setHours(dueDate.getHours() - estimatedHours, 0, 0, 0);
       
       const eventDetails: Calendar.Event = {
-        title: `📚 ${task.title}`,
+        title: `📚 ${task.title} (${task.subject})`,
         startDate: startDate,
         endDate: dueDate,
-        notes: `Subject: ${task.subject}\nPriority: ${task.priority.toUpperCase()}\nEstimated Time: ${task.estimatedTime}\n\nCreated by StudySync`,
+        notes: `Assignment from Google Classroom\nSubject: ${task.subject}\nPriority: ${task.priority.toUpperCase()}\nEstimated Time: ${task.estimatedTime}\n\nCreated by StudySync`,
         calendarId: calendarId,
         timeZone: 'GMT',
       };
 
       const eventId = await Calendar.createEventAsync(calendarId, eventDetails);
 
-      // Add a reminder notification 1 day before
+      // Add a reminder notification 1 day before (only if due date is more than 1 day away)
       const reminderDate = new Date(dueDate);
       reminderDate.setDate(reminderDate.getDate() - 1);
-      reminderDate.setHours(9, 0, 0, 0); // 9 AM reminder
+      
+      if (reminderDate > new Date()) {
+        reminderDate.setHours(9, 0, 0, 0); // 9 AM reminder
 
-      const reminderEvent: Calendar.Event = {
-        title: `⏰ Reminder: ${task.title} due tomorrow`,
-        startDate: reminderDate,
-        endDate: new Date(reminderDate.getTime() + 15 * 60 * 1000), // 15 minutes
-        notes: `Don't forget! ${task.title} is due tomorrow.\nSubject: ${task.subject}\nPriority: ${task.priority.toUpperCase()}`,
-        calendarId: calendarId,
-        timeZone: 'GMT',
-      };
+        const reminderEvent: Calendar.Event = {
+          title: `⏰ Reminder: ${task.title} due tomorrow`,
+          startDate: reminderDate,
+          endDate: new Date(reminderDate.getTime() + 15 * 60 * 1000), // 15 minutes
+          notes: `Don't forget! ${task.title} is due tomorrow.\nSubject: ${task.subject}\nPriority: ${task.priority.toUpperCase()}\n\nFrom StudySync`,
+          calendarId: calendarId,
+          timeZone: 'GMT',
+        };
 
-      await Calendar.createEventAsync(calendarId, reminderEvent);
+        await Calendar.createEventAsync(calendarId, reminderEvent);
+      }
 
       return eventId;
     } catch (error) {

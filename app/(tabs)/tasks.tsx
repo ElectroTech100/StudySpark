@@ -207,6 +207,9 @@ export default function TasksScreen() {
                 </View>
               </View>
               <Text style={styles.dueDate}>Due: {task.dueDate}</Text>
+              {task.dueDate === 'YYYY-MM-DD' && (
+                <Text style={styles.noDueDate}>No due date set</Text>
+              )}
             </View>
           </TouchableOpacity>
         )) : (
@@ -452,6 +455,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-Medium',
     color: '#8B5CF6',
+  },
+  noDueDate: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#9CA3AF',
+    fontStyle: 'italic',
   },
   emptyState: {
     backgroundColor: '#FFFFFF',

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Switch } from 'react-native';
-import { X, Calendar, CheckCircle, Clock, Smartphone, Monitor } from 'lucide-react-native';
+import { X, Calendar, CircleCheck as CheckCircle, Clock, Smartphone, Monitor } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import CalendarService from '@/services/CalendarService';
 
@@ -77,7 +77,7 @@ export default function CalendarSyncModal({ visible, onClose, tasks }: CalendarS
         subject: task.subject,
         estimatedTime: task.estimatedTime,
         priority: task.priority,
-      }));
+      })).filter(task => task.dueDate && task.dueDate !== 'YYYY-MM-DD'); // Only sync tasks with valid due dates
 
       const result = await CalendarService.syncTasksToCalendar(calendarTasks);
       
