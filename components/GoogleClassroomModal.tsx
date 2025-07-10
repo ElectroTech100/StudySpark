@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { X, BookOpen, Calendar, Download, RefreshCw, CheckCircle } from 'lucide-react-native';
+import { X, BookOpen, Calendar, Download, RefreshCw, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import GoogleClassroomService from '@/services/GoogleClassroomService';
 import CalendarService from '@/services/CalendarService';
