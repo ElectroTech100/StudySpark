@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Send, Bot, User, Lightbulb, BookOpen, Calculator, Beaker } from 'lucide-react-native';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import AIService from '@/services/AIService';
 
 interface Message {
   id: number;
@@ -105,21 +106,45 @@ export default function AIChatScreen() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputText.trim();
     setInputText('');
     setIsTyping(true);
 
-    // Simulate AI thinking time
-    setTimeout(() => {
+    try {
+      // Convert messages to AI service format
+      const conversationHistory = messages.slice(-5).map(msg => ({
+        role: msg.isUser ? 'user' as const : 'assistant' as const,
+        content: msg.text
+      }));
+      
+      // Add current message
+      conversationHistory.push({
+        role: 'user' as const,
+        content: currentInput
+      });
+
+      const aiResponseText = await AIService.generateResponse(conversationHistory);
+      
       const aiResponse: Message = {
         id: messages.length + 2,
-        text: generateAIResponse(inputText.trim()),
+        text: aiResponseText,
         isUser: false,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      const errorResponse: Message = {
+        id: messages.length + 2,
+        text: "I'm sorry, I'm having trouble responding right now. Please try again in a moment! 🤖",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const sendQuickPrompt = (prompt: string) => {
