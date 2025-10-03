@@ -13,10 +13,10 @@ interface AIResponse {
 
 class AIService {
   private apiKey: string;
-  private baseUrl = 'https://api.openai.com/v1/chat/completions';
+  private baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
   constructor() {
-    this.apiKey = process.env.EXPO_PUBLIC_AI_API_KEY || 'c5479c91703d4f4dbe13998c32b2cc62';
+    this.apiKey = process.env.EXPO_PUBLIC_AI_API_KEY || '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';
   }
 
   async generateResponse(messages: AIMessage[]): Promise<string> {
@@ -28,15 +28,15 @@ class AIService {
           'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'meta-llama/llama-3.3-8b-instruct:free',
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful AI study assistant for students. You help with academic questions, explain complex concepts, solve problems, and provide study tips. Keep responses educational, encouraging, and appropriate for students. Use emojis occasionally to make responses more engaging.'
+              content: 'You are a helpful AI study assistant for students. You help with academic questions, explain complex concepts, solve problems, and provide study tips. Keep responses educational, encouraging, and appropriate for students. Use emojis occasionally to make responses more engaging. Be concise but thorough in your explanations.'
             },
             ...messages
           ],
-          max_tokens: 500,
+          max_tokens: 1000,
           temperature: 0.7,
         }),
       });
